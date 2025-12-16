@@ -1,4 +1,6 @@
 # 🚀 Carbone.io Asynchronous Document Rendering Queue
+![Demonstration of Asynchronous Queue Flow](https://github.com/user-attachments/assets/8f5bc76e-6633-4d20-a62b-65756b35d9e9)
+
 
 This repository contains the source code for a demonstration application that simulates a microservices architecture for orchestrating the asynchronous generation of documents using the external **Carbone.io API**. 
 
