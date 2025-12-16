@@ -1,102 +1,120 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carbone Renderizador em Fila</title>
     <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: #f4f7f6;
-        color: #333;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh; /* Garante que o corpo ocupa toda a tela */
-    }
-    #container {
-        display: flex;
-        max-width: 1200px;
-        width: 100%;
-        gap: 20px;
-        flex-grow: 1; /* Permite que o container se expanda */
-    }
-    #input-area, #pdf-area {
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        background-color: #ffffff;
-        flex: 1;
-        display: flex; /* Adicionado para controle de layout interno */
-        flex-direction: column; /* Adicionado para controle de layout interno */
-    }
-    #input-area {
-        max-width: 400px;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            /* Garante que o corpo ocupa toda a tela */
+        }
 
-    /* ************************************************* */
-    /* AJUSTES PARA CORRIGIR O RENDERIZADOR */
-    /* ************************************************* */
-    #pdf-area {
-        flex: 2;
-        /* Define a altura máxima para que ele não ultrapasse a tela */
-        min-height: 600px; 
-        max-height: 80vh; /* Limite visual */
-        
-    }
-    #pdf-viewer {
-        /* Garante que o iframe preencha todo o espaço flexível restante */
-        flex-grow: 1; 
-        width: 100%;
-        height: 100%; /* Essencial para preencher a altura da #pdf-area */
-        border: 1px solid #ccc;
-    }
-    
-    /* ************************************************* */
-    
-    textarea {
-        width: 100%;
-        height: 250px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-        margin-bottom: 10px;
-        font-family: monospace;
-    }
-    button {
-        background-color: #007bff;
-        color: white;
-        padding: 8px 12px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
-    #status {
-        margin-top: 15px;
-        font-weight: bold;
-    }
-    #document-list {
-        list-style: none;
-        padding: 0;
-        margin-top: 10px;
-    }
-    #document-list li {
-        padding: 8px;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-</style>
+        #container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            gap: 20px;
+            flex-grow: 1;
+            /* Permite que o container se expanda */
+        }
+
+        #input-area,
+        #pdf-area {
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            flex: 1;
+            display: flex;
+            /* Adicionado para controle de layout interno */
+            flex-direction: column;
+            /* Adicionado para controle de layout interno */
+        }
+
+        #input-area {
+            max-width: 400px;
+        }
+
+        /* ************************************************* */
+        /* AJUSTES PARA CORRIGIR O RENDERIZADOR */
+        /* ************************************************* */
+        #pdf-area {
+            flex: 2;
+            /* Define a altura máxima para que ele não ultrapasse a tela */
+            min-height: 600px;
+            max-height: 80vh;
+            /* Limite visual */
+
+        }
+
+        #pdf-viewer {
+            /* Garante que o iframe preencha todo o espaço flexível restante */
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            /* Essencial para preencher a altura da #pdf-area */
+            border: 1px solid #ccc;
+        }
+
+        /* ************************************************* */
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        #document-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        #document-list li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
 </head>
+
 <body>
     <h1>Carbone.io: PDF render using Queue</h1>
     <p>Asynchronous processing simulation (10s).</p>
@@ -108,10 +126,10 @@
             <textarea id="json-input"></textarea>
             <button onclick="submitJob()">Enviar para Fila</button>
             <div id="status"></div>
-            
+
             <h3>Document Queue</h3>
             <ul id="document-list">
-                </ul>
+            </ul>
         </div>
 
         <div id="pdf-area">
@@ -122,13 +140,13 @@
 
     <script>
         // --- CONFIGURAÇÃO DO FRONTEND ---
-        const RENDER_ENDPOINT = "http://localhost:3000/render-pdf"; // Endpoint antigo (Não usado)
-        const SUBMIT_ENDPOINT = "http://localhost:3000/submit-job"; 
-        const PROCESS_ENDPOINT_BASE = "http://localhost:3000/process-job";
-        const DOWNLOAD_ENDPOINT_BASE = "http://localhost:3000/download";
-        const PROCESSING_TIME_MS = 10000; // 10 segundos
-        
-        let documentQueue = {}; 
+        const RENDER_ENDPOINT = "/render-pdf"; // Endpoint antigo (Não usado)
+        const SUBMIT_ENDPOINT = "/submit-job";
+        const PROCESS_ENDPOINT_BASE = "/process-job";
+        const DOWNLOAD_ENDPOINT_BASE = "/download";
+        const PROCESSING_TIME_MS = 10000;
+
+        let documentQueue = {};
 
         // --- JSON DE EXEMPLO COMPLETO ---
         const initialJson = {
@@ -159,23 +177,23 @@
         function displayQueue() {
             const list = document.getElementById('document-list');
             list.innerHTML = '';
-            
+
             for (const jobId in documentQueue) {
                 const doc = documentQueue[jobId];
                 const item = document.createElement('li');
-                
+
                 let statusHtml;
-                
+
                 if (doc.status === 'PENDING') {
                     const elapsed = (Date.now() - doc.startTime);
                     const remainingMs = Math.max(0, PROCESSING_TIME_MS - elapsed);
                     const remaining = Math.ceil(remainingMs / 1000);
-                    
+
                     statusHtml = `
                         <span style="color: orange;">Waiting (${remaining}s)</span> 
                     `;
                 } else if (doc.status === 'PROCESSING') {
-                     statusHtml = `<span style="color: blue;">PROCESSING...</span>`;
+                    statusHtml = `<span style="color: blue;">PROCESSING...</span>`;
                 } else if (doc.status === 'DONE') {
                     // Botão chama viewPDF(renderId), que só faz a requisição GET de download.
                     statusHtml = `
@@ -196,7 +214,7 @@ View PDF</button>
         async function submitJob() {
             const statusElement = document.getElementById('status');
             let requestBody;
-            
+
             try {
                 requestBody = JSON.parse(document.getElementById('json-input').value);
             } catch (error) {
@@ -207,31 +225,31 @@ View PDF</button>
 
             try {
                 statusElement.textContent = 'Sending data to the queue...';
-                
+
                 const response = await fetch(SUBMIT_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
-                
+
                 const result = await response.json();
 
                 if (!result.success) {
                     throw new Error(result.error || result.message);
                 }
-                
+
                 const jobId = result.jobId;
                 documentQueue[jobId] = {
                     status: 'PENDING',
                     startTime: Date.now(),
-                    renderId: null 
+                    renderId: null
                 };
-                
+
                 statusElement.style.color = 'blue';
                 statusElement.textContent = `Document received and saved for later processing.`;
-                
+
                 startJobTimer(jobId);
-                
+
             } catch (error) {
                 statusElement.style.color = 'red';
                 statusElement.textContent = `ERROR submitting Job: ${error.message}`;
@@ -240,9 +258,9 @@ View PDF</button>
 
         function startJobTimer(jobId) {
             displayQueue();
-            
+
             const job = documentQueue[jobId];
-            
+
             const interval = setInterval(() => {
                 const elapsed = Date.now() - job.startTime;
 
@@ -290,22 +308,22 @@ View PDF</button>
         async function viewPDF(renderId) {
             const statusElement = document.getElementById('status');
             const pdfViewer = document.getElementById('pdf-viewer');
-            
+
             statusElement.style.color = 'gray';
             statusElement.textContent = 'Downloading and loading PDF...';
-            
+
             try {
                 const response = await fetch(`${DOWNLOAD_ENDPOINT_BASE}/${renderId}`);
-                
+
                 if (response.status !== 200) {
-                     const errorText = await response.text();
-                     throw new Error(`
+                    const errorText = await response.text();
+                    throw new Error(`
 Error downloading PDF (Status: ${response.status}) - ${errorText}`);
                 }
-                
+
                 const pdfBlob = await response.blob();
                 const pdfUrl = URL.createObjectURL(pdfBlob);
-                
+
                 pdfViewer.src = pdfUrl;
                 statusElement.style.color = 'green';
                 statusElement.textContent = `✨ Document ${renderId.substring(0, 8)} loaded.`;
@@ -317,4 +335,5 @@ Error downloading PDF (Status: ${response.status}) - ${errorText}`);
         }
     </script>
 </body>
+
 </html>
