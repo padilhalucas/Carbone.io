@@ -3,7 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
-port = process.env.PORT || 3000;
+// Usa a porta do ambiente (Render) ou 3000 (local)
+const port = process.env.PORT || 3000; 
 
 // Variáveis de Ambiente
 const API_KEY = process.env.CARBONE_API_KEY;
@@ -11,7 +12,6 @@ const TEMPLATE_ID = process.env.CARBONE_TEMPLATE_ID;
 const API_BASE_URL = process.env.CARBONE_API_BASE_URL;
 
 // ** CACHE DE PROCESSAMENTO (Simulação em Memória) **
-// Armazena jobs: { jobId: { data: { seu_json }, status: 'PENDING' | 'DONE' | 'FAILED', renderId: null } }
 const processingQueue = {};
 const generateJobId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
 
@@ -27,6 +27,15 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
+
+// ************************************************
+// CORREÇÃO: ROTA RAIZ para servir o index.html
+// ************************************************
+app.get('/', (req, res) => {
+    // __dirname garante o caminho absoluto, essencial em ambientes de deploy
+    res.sendFile(__dirname + '/public/index.html');
+});
+// ************************************************
 
 // --- 1. Endpoint para RECEBER e SALVAR o Job na fila ---
 app.post('/submit-job', (req, res) => {
@@ -45,7 +54,6 @@ app.post('/submit-job', (req, res) => {
 
     console.log(`[Queue] Job ${jobId} recebido. Aguardando processamento.`);
 
-    // Retorna imediatamente o status de recebimento (202 Accepted)
     res.status(202).json({ 
         success: true, 
         jobId: jobId, 
@@ -54,7 +62,6 @@ app.post('/submit-job', (req, res) => {
 });
 
 // --- 2. Endpoint para PROCESSAR (Renderizar) o Job ---
-// Chamado pelo frontend após o timer de 10s
 app.post('/process-job/:jobId', async (req, res) => {
     const { jobId } = req.params;
     const job = processingQueue[jobId];
@@ -63,12 +70,12 @@ app.post('/process-job/:jobId', async (req, res) => {
         return res.status(404).json({ success: false, error: "Job ID não encontrado." });
     }
     
-    // Se o job já foi processado, retorna o ID imediatamente sem chamar a API de novo.
+    // Eficiência: Se o job já foi processado, retorna o ID imediatamente
     if (job.status === 'DONE') {
         return res.json({ success: true, renderId: job.renderId });
     }
 
-    // --- LÓGICA DE COMUNICAÇÃO COM O CARBONE.IO (Renderização POST) ---
+    // LÓGICA DE COMUNICAÇÃO COM O CARBONE.IO (Renderização POST)
     const RENDER_URL = `${API_BASE_URL}/render/${TEMPLATE_ID}`;
     const headers = {
         'Content-Type': 'application/json',
@@ -101,11 +108,9 @@ app.post('/process-job/:jobId', async (req, res) => {
 });
 
 // --- 3. Endpoint para DOWNLOAD do PDF ---
-// Chamado pelo frontend quando o usuário clica em "Visualizar PDF"
 app.get('/download/:renderId', async (req, res) => {
     const { renderId } = req.params;
     
-    // Lógica de download (GET)
     const DOWNLOAD_URL = `${API_BASE_URL}/render/${renderId}`;
     const headers = {
         'carbone-version': '5',
@@ -118,7 +123,6 @@ app.get('/download/:renderId', async (req, res) => {
             responseType: 'arraybuffer'
         });
 
-        // Retorna o PDF para o navegador
         res.setHeader('Content-Type', 'application/pdf');
         res.send(downloadResponse.data);
     } catch (error) {
@@ -128,6 +132,6 @@ app.get('/download/:renderId', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-    console.log(`Acesse a aplicação em: http://localhost:${port}/index.html`);
+    console.log(`Servidor rodando na porta: ${port}`);
+    console.log(`Acesse a aplicação localmente em: http://localhost:${port}`);
 });
