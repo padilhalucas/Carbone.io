@@ -2,7 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const path = require('path'); // <<< MÓDULO PATH IMPORTADO PARA CAMINHOS SEGUROS
+const path = require('path'); // <<< MÓDULO PATH IMPORTADO
 const app = express();
 // Usa a porta do ambiente (Render) ou 3000 (local)
 const port = process.env.PORT || 3000; 
@@ -19,9 +19,8 @@ const generateJobId = () => Date.now().toString(36) + Math.random().toString(36)
 // --- Middlewares ---
 app.use(express.json());
 
-// ************************************************
 // CORREÇÃO 1: Servir arquivos estáticos usando path.join
-// ************************************************
+// Isso garante que o Express saiba a localização exata da pasta 'public'
 app.use(express.static(path.join(__dirname, 'public'))); 
 
 // Middleware CORS (para desenvolvimento)
@@ -33,10 +32,11 @@ app.use((req, res, next) => {
 });
 
 // ************************************************
-// CORREÇÃO 2: Rota Raiz usando path.join
+// CORREÇÃO 2: Rota Raiz usando path.resolve
+// Esta é a correção para o erro 'ENOENT' no Render, garantindo o caminho absoluto.
 // ************************************************
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 // ************************************************
 
