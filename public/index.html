@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,18 +15,14 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            /* Garante que o corpo ocupa toda a tela */
         }
-
         #container {
             display: flex;
             max-width: 1200px;
             width: 100%;
             gap: 20px;
             flex-grow: 1;
-            /* Permite que o container se expanda */
         }
-
         #input-area,
         #pdf-area {
             padding: 20px;
@@ -36,38 +31,22 @@
             background-color: #ffffff;
             flex: 1;
             display: flex;
-            /* Adicionado para controle de layout interno */
             flex-direction: column;
-            /* Adicionado para controle de layout interno */
         }
-
         #input-area {
             max-width: 400px;
         }
-
-        /* ************************************************* */
-        /* AJUSTES PARA CORRIGIR O RENDERIZADOR */
-        /* ************************************************* */
         #pdf-area {
             flex: 2;
-            /* Define a altura máxima para que ele não ultrapasse a tela */
             min-height: 600px;
             max-height: 80vh;
-            /* Limite visual */
-
         }
-
         #pdf-viewer {
-            /* Garante que o iframe preencha todo o espaço flexível restante */
             flex-grow: 1;
             width: 100%;
             height: 100%;
-            /* Essencial para preencher a altura da #pdf-area */
             border: 1px solid #ccc;
         }
-
-        /* ************************************************* */
-
         textarea {
             width: 100%;
             height: 250px;
@@ -78,7 +57,6 @@
             margin-bottom: 10px;
             font-family: monospace;
         }
-
         button {
             background-color: #007bff;
             color: white;
@@ -89,22 +67,18 @@
             font-size: 14px;
             transition: background-color 0.3s;
         }
-
         button:hover {
             background-color: #0056b3;
         }
-
         #status {
             margin-top: 15px;
             font-weight: bold;
         }
-
         #document-list {
             list-style: none;
             padding: 0;
             margin-top: 10px;
         }
-
         #document-list li {
             padding: 8px;
             border-bottom: 1px solid #eee;
@@ -114,9 +88,8 @@
         }
     </style>
 </head>
-
 <body>
-    <h1>Carbone.io: PDF render using Queue</h1>
+    <h1>Carbone.io: PDF Render using Queue</h1>
     <p>Asynchronous processing simulation (10s).</p>
 
     <div id="container">
@@ -124,7 +97,7 @@
             <h2>1. Insert JSON Data</h2>
             <p>The JSON is sent to the server to be added to the queue.</p>
             <textarea id="json-input"></textarea>
-            <button onclick="submitJob()">Enviar para Fila</button>
+            <button onclick="submitJob()">Send to Queue</button>
             <div id="status"></div>
 
             <h3>Document Queue</h3>
@@ -133,14 +106,12 @@
         </div>
 
         <div id="pdf-area">
-            <h2>2. PDF preview</h2>
+            <h2>2. PDF Preview</h2>
             <iframe id="pdf-viewer" src="" title="PDF Viewer"></iframe>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO DO FRONTEND ---
-        const RENDER_ENDPOINT = "/render-pdf"; // Endpoint antigo (Não usado)
         const SUBMIT_ENDPOINT = "/submit-job";
         const PROCESS_ENDPOINT_BASE = "/process-job";
         const DOWNLOAD_ENDPOINT_BASE = "/download";
@@ -148,7 +119,6 @@
 
         let documentQueue = {};
 
-        // --- JSON DE EXEMPLO COMPLETO ---
         const initialJson = {
             "convertTo": "pdf",
             "data": {
@@ -166,13 +136,8 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Preenche o textarea com o JSON de exemplo
             document.getElementById('json-input').value = JSON.stringify(initialJson, null, 2);
         });
-
-        // =======================================================
-        // LÓGICA DE FILA E EXIBIÇÃO
-        // =======================================================
 
         function displayQueue() {
             const list = document.getElementById('document-list');
@@ -193,13 +158,11 @@
                         <span style="color: orange;">Waiting (${remaining}s)</span> 
                     `;
                 } else if (doc.status === 'PROCESSING') {
-                    statusHtml = `<span style="color: blue;">PROCESSING...</span>`;
+                    statusHtml = `<span style="color: blue;">Processing...</span>`;
                 } else if (doc.status === 'DONE') {
-                    // Botão chama viewPDF(renderId), que só faz a requisição GET de download.
                     statusHtml = `
                         <span style="color: green;">Completed Document</span> 
-                        <button onclick="viewPDF('${doc.renderId}')">
-View PDF</button>
+                        <button onclick="viewPDF('${doc.renderId}')">View PDF</button>
                     `;
                 } else if (doc.status === 'FAILED') {
                     statusHtml = `<span style="color: red;">Failed!</span>`;
@@ -210,7 +173,6 @@ View PDF</button>
             }
         }
 
-        // Função que envia o job para o backend (PASSO 1: SUBMIT)
         async function submitJob() {
             const statusElement = document.getElementById('status');
             let requestBody;
@@ -272,7 +234,6 @@ View PDF</button>
             }, 1000);
         }
 
-        // Função que chama o backend para processar o job após o timer (PASSO 2: PROCESS)
         async function processAndCompleteJob(jobId) {
             const job = documentQueue[jobId];
             if (!job || job.status !== 'PENDING') return;
@@ -281,7 +242,6 @@ View PDF</button>
             displayQueue();
 
             try {
-                // Chama o backend para renderizar (POST no Carbone)
                 const response = await fetch(`${PROCESS_ENDPOINT_BASE}/${jobId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
@@ -303,8 +263,6 @@ View PDF</button>
             displayQueue();
         }
 
-        // Função para renderizar o PDF (PASSO 3: DOWNLOAD e DISPLAY)
-        // Note: Esta função não chama o Carbone.io diretamente, mas sim o nosso backend /download.
         async function viewPDF(renderId) {
             const statusElement = document.getElementById('status');
             const pdfViewer = document.getElementById('pdf-viewer');
@@ -317,8 +275,7 @@ View PDF</button>
 
                 if (response.status !== 200) {
                     const errorText = await response.text();
-                    throw new Error(`
-Error downloading PDF (Status: ${response.status}) - ${errorText}`);
+                    throw new Error(`Error downloading PDF (Status: ${response.status}) - ${errorText}`);
                 }
 
                 const pdfBlob = await response.blob();
@@ -335,5 +292,4 @@ Error downloading PDF (Status: ${response.status}) - ${errorText}`);
         }
     </script>
 </body>
-
 </html>
