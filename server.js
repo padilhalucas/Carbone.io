@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const path = require('path'); // <<< MÓDULO PATH IMPORTADO PARA CAMINHOS SEGUROS
 const app = express();
 // Usa a porta do ambiente (Render) ou 3000 (local)
 const port = process.env.PORT || 3000; 
@@ -17,8 +18,11 @@ const generateJobId = () => Date.now().toString(36) + Math.random().toString(36)
 
 // --- Middlewares ---
 app.use(express.json());
-// Serve arquivos estáticos da pasta 'public'
-app.use(express.static('public')); 
+
+// ************************************************
+// CORREÇÃO 1: Servir arquivos estáticos usando path.join
+// ************************************************
+app.use(express.static(path.join(__dirname, 'public'))); 
 
 // Middleware CORS (para desenvolvimento)
 app.use((req, res, next) => {
@@ -29,13 +33,13 @@ app.use((req, res, next) => {
 });
 
 // ************************************************
-// CORREÇÃO: ROTA RAIZ para servir o index.html
+// CORREÇÃO 2: Rota Raiz usando path.join
 // ************************************************
 app.get('/', (req, res) => {
-    // __dirname garante o caminho absoluto, essencial em ambientes de deploy
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 // ************************************************
+
 
 // --- 1. Endpoint para RECEBER e SALVAR o Job na fila ---
 app.post('/submit-job', (req, res) => {
@@ -70,7 +74,6 @@ app.post('/process-job/:jobId', async (req, res) => {
         return res.status(404).json({ success: false, error: "Job ID não encontrado." });
     }
     
-    // Eficiência: Se o job já foi processado, retorna o ID imediatamente
     if (job.status === 'DONE') {
         return res.json({ success: true, renderId: job.renderId });
     }
